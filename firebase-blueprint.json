@@ -1,0 +1,432 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Registered user profile in NaddD",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "avatarColor": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "avatarEmoji": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "member"
+          ]
+        },
+        "tagline": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "FriendGroup": {
+      "title": "FriendGroup",
+      "description": "A circle or friend group for coordinating schedules",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "color": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "icon": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "creatorId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "members": {
+          "type": "array"
+        },
+        "inviteCodes": {
+          "type": "array"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "memberIds": {
+          "type": "array"
+        },
+        "joinCode": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "creatorId",
+        "ownerId",
+        "memberIds"
+      ]
+    },
+    "CalendarEvent": {
+      "title": "CalendarEvent",
+      "description": "A scheduled event, friend meetup, or personal block",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 150
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "date": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "startTime": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "endTime": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "location": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "groupId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "groupName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "groupColor": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "creatorId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "attendees": {
+          "type": "array"
+        },
+        "poll": {
+          "type": "object"
+        },
+        "changeHistory": {
+          "type": "array"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "confirmed",
+            "rescheduled",
+            "cancelled"
+          ]
+        },
+        "reminders": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "date",
+        "startTime",
+        "endTime",
+        "ownerId"
+      ]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A task or to-do item",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "urgent",
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "in_progress",
+            "done"
+          ]
+        },
+        "dueDate": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "projectId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "subtasks": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "status",
+        "ownerId"
+      ]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "User notification regarding gathering updates, polls, and check-ins",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "timestamp": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "event_invite",
+            "event_update",
+            "event_reminder",
+            "task_reminder",
+            "poll_update",
+            "attendance_verification",
+            "free_date_match"
+          ]
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "eventId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "groupId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "needsAction": {
+          "type": "boolean"
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "message",
+        "type",
+        "read",
+        "ownerId"
+      ]
+    },
+    "InviteCode": {
+      "title": "InviteCode",
+      "description": "Invite code for joining a circle (document id = code)",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "groupId": {
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "string"
+        },
+        "expiresAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expiresAtMs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "expirationType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isUsed": {
+          "type": "boolean"
+        },
+        "usedBy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "usedByName": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "groupId",
+        "ownerId",
+        "isUsed"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Registered user profile documents"
+    },
+    "/groups/{groupId}": {
+      "schema": {
+        "$ref": "#/entities/FriendGroup"
+      },
+      "description": "Friend groups and circles"
+    },
+    "/events/{eventId}": {
+      "schema": {
+        "$ref": "#/entities/CalendarEvent"
+      },
+      "description": "Calendar events, meetups, and personal commitments"
+    },
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/entities/Task"
+      },
+      "description": "Tasks and action items"
+    },
+    "/notifications/{notifId}": {
+      "schema": {
+        "$ref": "#/entities/NotificationItem"
+      },
+      "description": "User notifications"
+    },
+    "/invites/{code}": {
+      "schema": {
+        "$ref": "#/entities/InviteCode"
+      },
+      "description": "Invite codes for joining circles"
+    }
+  }
+}

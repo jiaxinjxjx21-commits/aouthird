@@ -1,0 +1,143 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Anything not matched below is denied by default.
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Personal documents: only the creator (ownerId = auth.uid) can touch them
+    function ownsExisting() {
+      return isSignedIn() && existing().ownerId == request.auth.uid;
+    }
+
+    function ownsIncoming() {
+      return isSignedIn() && incoming().ownerId == request.auth.uid;
+    }
+
+    // User profiles: private to the owner
+    match /users/{userId} {
+      allow read, delete: if isSignedIn() && request.auth.uid == userId;
+      allow create, update: if isSignedIn() && request.auth.uid == userId && incoming().id == userId;
+    }
+
+    // Friend circles: shared by everyone listed in memberIds
+    match /groups/{groupId} {
+
+      function isMemberOf(data) {
+        return 'memberIds' in data && request.auth.uid in data.memberIds;
+      }
+
+      function validName() {
+        return incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 120;
+      }
+
+      // The invite must belong to this circle's owner, be unused and not expired
+      function validInvite(code, ownerId) {
+        let inv = get(/databases/$(database)/documents/invites/$(code)).data;
+        return inv.groupId == groupId
+          && inv.ownerId == ownerId
+          && inv.isUsed == false
+          && (inv.expiresAtMs == null || inv.expiresAtMs > request.time.toMillis());
+      }
+
+      // A signed-in user joining with a valid invite: may only add themselves
+      function isJoining() {
+        return !isMemberOf(existing())
+          && incoming().diff(existing()).affectedKeys().hasOnly(['memberIds', 'members', 'joinCode', 'updatedAt'])
+          && incoming().memberIds.size() == existing().memberIds.size() + 1
+          && request.auth.uid in incoming().memberIds
+          && incoming().members.size() == existing().members.size() + 1
+          && validInvite(incoming().joinCode, existing().ownerId);
+      }
+
+      allow read: if isSignedIn() && (existing().ownerId == request.auth.uid || isMemberOf(existing()));
+
+      allow create: if isSignedIn() && isValidId(groupId) && validName()
+        && ownsIncoming()
+        && request.auth.uid in incoming().memberIds;
+
+      allow update: if isSignedIn() && (
+        // owner keeps ownership and stays a member
+        (existing().ownerId == request.auth.uid && validName()
+          && incoming().ownerId == existing().ownerId
+          && request.auth.uid in incoming().memberIds)
+        // members can edit the circle but cannot change who belongs to it
+        || (isMemberOf(existing()) && validName()
+          && incoming().ownerId == existing().ownerId
+          && incoming().memberIds == existing().memberIds)
+        || isJoining()
+      );
+
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+    }
+
+    // Invite codes (document id = code). Anyone signed in can look one up by code,
+    // but codes cannot be listed except by their owner.
+    match /invites/{code} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+
+      allow create: if isValidId(code) && ownsIncoming()
+        && incoming().isUsed == false
+        && incoming().groupId is string;
+
+      allow update: if isSignedIn() && (
+        // owner can refresh details but not hand the invite to someone else
+        (ownsExisting() && incoming().ownerId == existing().ownerId)
+        // a friend claims an unused code for themselves
+        || (existing().isUsed == false
+          && incoming().isUsed == true
+          && incoming().usedBy == request.auth.uid
+          && incoming().diff(existing()).affectedKeys().hasOnly(['isUsed', 'usedBy', 'usedByName']))
+      );
+
+      allow delete: if ownsExisting();
+    }
+
+    // Events & gatherings (personal for now)
+    match /events/{eventId} {
+      allow read: if ownsExisting();
+      allow create: if isValidId(eventId) && ownsIncoming()
+        && incoming().title is string && incoming().title.size() > 0 && incoming().title.size() <= 150;
+      allow update: if ownsExisting() && ownsIncoming()
+        && incoming().title is string && incoming().title.size() > 0 && incoming().title.size() <= 150;
+      allow delete: if ownsExisting();
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if ownsExisting();
+      allow create: if isValidId(taskId) && ownsIncoming()
+        && incoming().title is string && incoming().title.size() > 0 && incoming().title.size() <= 200;
+      allow update: if ownsExisting() && ownsIncoming()
+        && incoming().title is string && incoming().title.size() > 0 && incoming().title.size() <= 200;
+      allow delete: if ownsExisting();
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read: if ownsExisting();
+      allow create: if isValidId(notifId) && ownsIncoming()
+        && incoming().title is string && incoming().title.size() <= 200;
+      allow update: if ownsExisting() && ownsIncoming()
+        && incoming().title is string && incoming().title.size() <= 200;
+      allow delete: if ownsExisting();
+    }
+  }
+}

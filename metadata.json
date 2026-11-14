@@ -1,0 +1,6 @@
+{
+  "name": "NaddD",
+  "description": "Minimal, clean task organizer and social gathering scheduler with mutual free date matching across friend groups, personal life event blocking, colored friend group calendars, and meeting attendance verification alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
